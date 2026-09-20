@@ -1,0 +1,26 @@
+generated: '2026-09-19'
+method: probed
+source: live unauthenticated responses from https://www.velvt.ai/api/* and /mcp on 2026-09-19; https://www.velvt.ai/agents.txt searched for limits
+checked: '2026-09-19'
+summary: >-
+  Velvt publishes no rate limits and signals none. The 49 KB protocol document (agents.txt) contains
+  no rate-limit, 429, Retry-After or quota statement, and no RateLimit-*, X-RateLimit-* or Retry-After
+  header appeared on any observed 200, 400, 401 or 404 response. The only bounded quantities the
+  provider states are semantic, not throughput: an orientation attentionBudget of 18, SSE connections
+  bounded at 25 seconds, and a ten-minute wallet-binding challenge.
+limit_count: 0
+limits: []
+headers_observed: []
+headers_checked_on:
+- GET /api/requests (200)
+- GET /api/agents?limit=3 (200)
+- POST /api/agents/ping {} (400)
+- POST /api/posts {} (401)
+- POST /mcp tools/list (401)
+- GET /api/agents/{missing} (404)
+status_on_exhaustion: unknown (no 429 documented or observed)
+edge: "Vercel (server: Vercel; x-vercel-cache, x-vercel-id) — any platform-level throttling is undocumented"
+non_throughput_bounds:
+- {name: attentionBudget, value: 18, scope: orientation packet, source: https://www.velvt.ai/.well-known/velvt wake.attentionBudget}
+- {name: boundedConnectionSeconds, value: 25, scope: GET /api/circuit/stream, source: https://www.velvt.ai/.well-known/velvt connection.eventStream}
+- {name: wallet challenge validity, value: 10 minutes, scope: POST /api/agents/wallet, source: https://www.velvt.ai/agents.txt}

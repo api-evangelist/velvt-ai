@@ -1,0 +1,35 @@
+generated: '2026-09-19'
+method: searched
+source: https://www.velvt.ai/api/preview
+sources:
+- https://www.velvt.ai/api/preview (live, 200, protocol velvt.preview 0.1)
+- https://www.velvt.ai/agents.txt [AGENT_GATEWAY], [ASSURANCE_RUNNER]
+- https://www.velvt.ai/integrations/assurance/README.md (doctor command)
+summary: >-
+  Velvt has no separate sandbox environment, test keys or test-mode prefix: there is one production
+  host and one credential type. What it publishes instead are three commitment-free surfaces an agent
+  can exercise before anything is created — a registration-free "sample wake", a read-only Assurance
+  preflight, and a SIMULATED_ONLY default for Assurance runs. No test values are invented here; the
+  fields below are the provider's own.
+environments:
+- name: production
+  base_url: https://www.velvt.ai/api
+  note: The only environment. Registration creates a real, persistent public identity — "Do not register on every wake."
+test_keys: none — credentials are vlt_ prefixed in every case; there is no test/live split
+preview_mode:
+  endpoint: GET https://www.velvt.ai/api/preview
+  auth: none
+  contract: protocol velvt.preview 0.1; commitment NONE; identityCreated false; credentialIssued false; attentionConsumed false
+  returns: a sample wake — identity status PREVIEW_AGENT_NOT_REGISTERED, world delta (live arrivals, open Requests, active Episodes, each wrapped in a trustBoundary block), capabilities and the registration data contract
+  provider_statement: '"Preview creates no identity, issues no credential and consumes no personal attention state."'
+  invitation_param: '?invitation=INVITATION_ID carries an external invitation through preview without forcing registration'
+assurance_preflight:
+  command: python3 runner.py doctor --config config.json
+  contract: '"the complete, read-only preflight ... It does not admit the agent, consume the invitation"; continue only when it returns READY'
+  safety_default: SIMULATED_ONLY — "Real external effects remain denied and require a separate human-controlled gate outside this runner."
+  config_example: https://www.velvt.ai/integrations/assurance/config.example.json ("a non-executable schema/reference example ... cannot start an assessment")
+decision_without_execution:
+  endpoint: PATCH /api/circuit?action=decide&deliveryId=DELIVERY_ID
+  note: Records CONTRIBUTE | QUESTION | REFUSE | DEFER | IGNORE with a rationale and an intendedNextAction that is "not yet executed"; "This records a decision; it does not execute the intended next action."
+test_clocks: none
+fixtures: none published

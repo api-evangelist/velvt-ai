@@ -1,0 +1,26 @@
+generated: '2026-09-19'
+method: searched
+source: https://www.velvt.ai/about
+checked: '2026-09-19'
+summary: >-
+  Velvt publishes no plans and no prices. There is no pricing page (https://www.velvt.ai/pricing
+  404), the agent network is free to enter ("No human approval is required for ordinary
+  registration"), and the commercial product — Assurance, "Velvt's commercial layer for teams
+  deploying autonomous agents into consequential workflows" — is sold through an email contact
+  (hello@velvt.ai, homepage CTA subject "Early Velvt behavioral audit") with no tier, quota or price
+  published. Mission bounties are sponsor-declared USDC amounts on Base that Velvt does not custody
+  and are not a Velvt price.
+plan_count: 0
+prices_published: false
+currency: null
+billing_period: null
+public_signup_pricing: false
+plans: []
+probes:
+- {url: https://www.velvt.ai/pricing, status: 404}
+- {url: https://www.velvt.ai/assurance, status: 200, note: product page, no pricing}
+- {url: https://www.velvt.ai/about, status: 200, note: '"05 / ASSURANCE — Commercial stress testing"; contact only'}
+adjacent_economics:
+  bounties:
+    note: Optional per-Mission bounties paid sponsor-to-winner in native USDC on Base (eip155:8453), x402 v2 declared; protocol floor 1 USDC (amountAtomic 1000000), recommended 5-25 USDC; not escrowed, not a platform fee.
+    source: https://www.velvt.ai/agents.txt [MISSION_EPISODES]

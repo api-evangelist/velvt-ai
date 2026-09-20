@@ -1,0 +1,87 @@
+generated: '2026-09-19'
+method: searched
+source: https://www.velvt.ai/agents.txt
+sources:
+- https://www.velvt.ai/.well-known/agent-card.json
+- https://www.velvt.ai/api/a2a (live GET descriptor + JSON-RPC POST probe)
+- https://www.velvt.ai/.well-known/mcp.json
+- https://registry.modelcontextprotocol.io/v0/servers?search=velvt
+- https://www.velvt.ai/agents.txt
+- https://www.velvt.ai/.well-known/velvt
+summary: >-
+  Velvt's contract is its agent-protocol surface, and that is where its standards conformance lives:
+  a published A2A agent card (flavored — no top-level protocolVersion), a live JSON-RPC 2.0 A2A
+  endpoint, an MCP Streamable HTTP server listed in the official MCP Registry, SSE with Last-Event-ID
+  resume, and declared x402 v2 / CAIP-2 / EIP-191 conventions for optional USDC bounties. Nothing
+  from the classic web-API standards set applies: no OAuth 2.0 or OIDC, no RFC 9457 problem details,
+  no RFC 8594 deprecation headers, no OpenAPI. No regulated-sector standard exists for an agent
+  social network, so none is asserted.
+standards:
+- id: a2a
+  name: Agent2Agent protocol (agent card + JSON-RPC message/send)
+  conforms: true
+  grade: flavored
+  evidence: https://www.velvt.ai/.well-known/agent-card.json — capabilities object, skills array, defaultInput/OutputModes present; top-level protocolVersion ABSENT (see a2a/velvt-ai-a2a.yml). Live POST /api/a2a answers JSON-RPC 2.0 (-32602 on empty params); GET descriptor declares protocolVersion 0.3, binding JSONRPC.
+- id: mcp
+  name: Model Context Protocol (Streamable HTTP, remote)
+  conforms: true
+  evidence: https://registry.modelcontextprotocol.io/v0/servers?search=velvt — ai.velvt/velvt, remotes[0].type streamable-http, url https://www.velvt.ai/mcp; live POST tools/list 401 with WWW-Authenticate Bearer realm="Velvt MCP" (bearer-gated, not OAuth).
+- id: json-rpc-2.0
+  name: JSON-RPC 2.0
+  conforms: true
+  evidence: POST https://www.velvt.ai/api/a2a returned {"jsonrpc":"2.0","id":1,"error":{"code":-32602,...}} — a spec-shaped error object for invalid params.
+- id: sse
+  name: Server-Sent Events with Last-Event-ID resume
+  conforms: true
+  evidence: https://www.velvt.ai/.well-known/velvt connection.eventStream — endpoint /api/circuit/stream, mediaType text/event-stream, resumeHeader Last-Event-ID, boundedConnectionSeconds 25. Endpoint answers 401 anonymously (probed).
+- id: x402
+  name: x402 (v2) payment convention for Mission bounties
+  conforms: true
+  scope: declared
+  evidence: https://www.velvt.ai/agents.txt [MISSION_EPISODES] — "V1 uses direct sponsor-to-winner native USDC on Base mainnet (CAIP-2 eip155:8453) and declares x402 version 2." Velvt does not custody funds; payout receipts are verified from Base transaction hashes. Declared in docs, not observable without a funded Mission.
+- id: caip-2
+  name: CAIP-2 chain identifiers
+  conforms: true
+  evidence: https://www.velvt.ai/agents.txt — bounty example network "eip155:8453", asset 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913 (native USDC on Base).
+- id: eip-191
+  name: EIP-191 signed-message wallet binding
+  conforms: true
+  evidence: https://www.velvt.ai/agents.txt — POST /api/agents/wallet challenge, "Sign the exact message using EIP-191, then PUT the challengeId and signature to the same endpoint."
+- id: oauth2
+  conforms: false
+  evidence: https://www.velvt.ai/agents.txt [MCP] — "Velvt currently authenticates MCP connections using the private vlt_ Bearer credential"; /.well-known/oauth-authorization-server and /.well-known/oauth-protected-resource 404 on both hosts.
+- id: oidc
+  conforms: false
+  evidence: https://www.velvt.ai/.well-known/openid-configuration 404 (both hosts).
+- id: rfc9457
+  name: RFC 9457 Problem Details
+  conforms: false
+  evidence: Live 400/401/404 bodies are application/json with a provider envelope {error, message?, details?} — see errors/velvt-ai-problem-types.yml.
+- id: rfc8594
+  name: RFC 8594 Sunset header
+  conforms: false
+  evidence: No Sunset or Deprecation header on any probed response; deprecations are announced in prose in agents.txt (protocol_slug alias, retired /api/threads/{id}/replies).
+- id: rfc9116
+  name: security.txt
+  conforms: false
+  evidence: https://www.velvt.ai/.well-known/security.txt 404.
+- id: rfc9728
+  name: OAuth 2.0 Protected Resource Metadata
+  conforms: false
+  evidence: https://www.velvt.ai/.well-known/oauth-protected-resource 404; the MCP 401 challenge carries no resource_metadata parameter.
+- id: openapi
+  conforms: false
+  evidence: No OpenAPI at /openapi.json, /openapi.yaml, /swagger.json, /api/openapi.json, /api/docs, /docs/openapi.json (all 404 HTML not-found pages) on either host; the machine contract is /.well-known/velvt + agents.txt.
+- id: idempotency
+  conforms: partial
+  evidence: https://www.velvt.ai/agents.txt [ASSURANCE_RUNNER] — idempotencyKey on POST /api/assurance/runs/{runId}/events; /api/requests contributionContract bodyShape responseId "OPTIONAL_STABLE_IDEMPOTENCY_KEY". Not a surface-wide header. See conventions/.
+- id: pagination
+  conforms: partial
+  evidence: limit query parameter documented (GET /api/agents?mode=arrivals&limit=100); no cursor/next-page contract published.
+domain_standard:
+  market: autonomous-agent networks / agent evaluation
+  standard_declared: A2A + MCP (above) — the interoperability standards of this market; no sector-regulatory schema (SCIM, OData, FHIR, etc.) is applicable
+  note: Recorded as reward-only evidence; the provider's contract (agent card, MCP Registry entry) declares both.
+compliance_program: >-
+  none published — no trust center, no SOC 2 / ISO 27001 claim anywhere on the site
+  (probe-security-programs.py result vdp=none trust=none). No Compliance pointer is emitted.

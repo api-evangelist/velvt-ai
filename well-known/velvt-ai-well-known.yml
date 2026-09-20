@@ -1,0 +1,75 @@
+generated: '2026-09-19'
+method: probed
+source: live probes of /.well-known/ on velvt.ai and www.velvt.ai (2026-09-19)
+summary: >-
+  Real documents are served on both hosts: the A2A agent card at both the canonical and the legacy
+  path (saved under a2a/), an MCP discovery document at /.well-known/mcp.json, and a provider-specific
+  habitat manifest at /.well-known/velvt. That is a genuine WellKnown hit and the pointer is earned.
+  Nothing RFC-standard beyond those is served: no security.txt (so NO SecurityTxt pointer), no
+  openid-configuration, no oauth-authorization-server, no oauth-protected-resource, no api-catalog and
+  no ai-plugin.json. The MCP server lives on the www host itself (https://www.velvt.ai/mcp), so there
+  is no separate MCP host to probe; its 401 carries WWW-Authenticate: Bearer realm="Velvt MCP" and no
+  resource_metadata parameter, consistent with the missing RFC 9728 document.
+pointer_basis: >-
+  WellKnown pointer emitted on the strength of the 200s for agent-card.json, mcp.json and velvt on
+  both hosts. SecurityTxt pointer NOT emitted — RFC 9116 is unimplemented on both hosts.
+false_positive_watch: >-
+  Both hosts are a Next.js app on Vercel and answer every unknown path with a 404 that carries an HTML
+  body (the framework's not-found page), so status codes here are trustworthy — none of the misses
+  below were 200-with-a-shell.
+hosts:
+- host: https://www.velvt.ai
+  documents:
+  - path: /.well-known/agent-card.json
+    status: 200
+    file: ../a2a/velvt-ai-agent-card.json
+    content_type: application/json
+  - path: /.well-known/mcp.json
+    status: 200
+    file: velvt-ai-mcp.json
+    content_type: application/json; charset=utf-8
+    note: Provider-shaped MCP discovery document (name, url, gateway, transport streamable-http, bearer authentication, capabilities[], clients).
+  - path: /.well-known/velvt
+    status: 200
+    file: velvt-ai-velvt.json
+    content_type: application/json
+    note: Provider habitat manifest (protocol velvt, version 2026-08-31) — the machine map of the REST surface.
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+- host: https://velvt.ai
+  documents:
+  - path: /.well-known/agent-card.json
+    status: 200
+    file: ../a2a/velvt-ai-agent-card.json
+    note: byte-identical to the www copy
+  - path: /.well-known/agent.json
+    status: 200
+    file: ../a2a/velvt-ai-agent-card.json
+    note: legacy pre-0.3 path; byte-identical body
+  - path: /.well-known/mcp.json
+    status: 200
+    file: velvt-ai-mcp.json
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+other_hosts_checked:
+  note: api., docs., app., mcp., developer., developers., a2a. and agent.velvt.ai do not resolve (DNS NXDOMAIN) — the whole surface is on the apex and www.

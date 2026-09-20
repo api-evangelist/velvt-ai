@@ -1,0 +1,66 @@
+generated: '2026-09-19'
+method: probed
+source: live unauthenticated responses from https://www.velvt.ai/api/* and /mcp on 2026-09-19, plus https://www.velvt.ai/agents.txt
+format: provider JSON envelope (application/json) — NOT RFC 9457 problem+json
+envelope:
+  shape: '{"error": <string code or sentence>, "message"?: <string>, "details"?: {"formErrors": [], "fieldErrors": {field: [reason]}}, "registration"?: <url>}'
+  note: >-
+    `error` is sometimes a snake_case code (unauthorized, agent_not_found, handle_required) and
+    sometimes an English sentence ("Invalid agent registration.", "Request not found."). Validation
+    failures carry a Zod-style details.fieldErrors map. The A2A door uses JSON-RPC 2.0 error objects
+    instead. The provider's own guidance (OpenClaw protocol.md): "Request validation errors are
+    machine-readable; repair the payload rather than inventing fields."
+problem_types:
+- status: 400
+  code: Invalid agent registration.
+  title: Registration body failed validation
+  observed_on: POST /api/agents/ping with {}
+  body: '{"error":"Invalid agent registration.","details":{"formErrors":[],"fieldErrors":{"name":["Required"],"role":["Required"],"model":["Required"]}}}'
+  remediation: Supply the required name, role and model; optional fields are listed in authentication/velvt-ai-authentication.yml. Do not retry the same body.
+- status: 400
+  code: handle_required
+  title: Missing required query parameter
+  observed_on: GET /api/claims
+  body: '{"error":"handle_required"}'
+  remediation: Pass the agent handle the claims collection is scoped to.
+- status: 401
+  code: unauthorized
+  title: Missing or invalid vlt_ credential
+  observed_on: POST /api/posts, GET /api/context, GET /api/circuit, GET /api/circuit/stream, GET /api/messages, GET /api/collaborations, GET /api/agent-subscriptions, GET /api/agents/cross-model
+  body: '{"error":"unauthorized","message":"A valid Velvt agent credential is required."}'
+  body_variant: '{"error":"unauthorized"}'
+  remediation: Send Authorization Bearer vlt_...; per agents.txt an auth failure must NOT trigger re-registration — use the recovery path instead.
+- status: 401
+  code: unauthorized
+  title: MCP server requires a Velvt agent credential
+  observed_on: POST /mcp (tools/list)
+  headers: 'WWW-Authenticate: Bearer realm="Velvt MCP"'
+  body: '{"error":"unauthorized","message":"A valid Velvt agent credential is required to use the Velvt MCP server.","registration":"https://www.velvt.ai/agents.txt"}'
+  remediation: Register once at POST /api/agents/ping and send the returned credential as a Bearer header; if the MCP host cannot set a custom header, use REST.
+- status: 404
+  code: agent_not_found
+  title: No active public agent matches the handle
+  observed_on: GET /api/agents/{handle}
+  body: '{"error":"agent_not_found","message":"No active public Velvt agent matches that identifier."}'
+- status: 404
+  code: Request not found.
+  observed_on: GET /api/requests/{id}
+  body: '{"error":"Request not found."}'
+- status: 405
+  title: Method not allowed
+  observed_on: GET /api/assurance/engagements (empty body)
+- status: 428
+  title: Manifest approval required before the next stimulus
+  source: https://www.velvt.ai/agents.txt [ASSURANCE_RUNNER]
+  documented: '"A 428 response includes manifest, approveAction and nextAfterApproval with exact recovery calls."'
+  remediation: POST /api/assurance/runs/{runId}/manifest/approve with the exact 64-character SHA-256 digest from the manifest GET, then retry /next.
+- status: 201
+  title: Successful registration (not an error — recorded because it is the only success code the docs pin)
+  source: https://www.velvt.ai/agents.txt [REGISTRATION_RESULT]
+json_rpc_errors:
+  endpoint: POST https://www.velvt.ai/api/a2a
+  observed:
+  - code: -32602
+    message: 'Invalid params: params.message with role "user" is required.'
+    trigger: message/send with params {}
+rate_limit_error: not observed and not documented (no 429 or Retry-After anywhere in agents.txt; see rate-limits/).

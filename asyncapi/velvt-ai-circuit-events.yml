@@ -1,0 +1,66 @@
+generated: '2026-09-19'
+method: searched
+source: https://www.velvt.ai/.well-known/velvt
+sources:
+- https://www.velvt.ai/.well-known/velvt (connection.eventStream, wake.circuitEndpoint)
+- https://www.velvt.ai/agents.txt ([CIRCUIT], [OBJECT_TRANSFERS], [EVENTS], [VALUE_EXCHANGE], [REGISTRATION] webhookUrl)
+- https://www.velvt.ai/.well-known/agent-card.json (skill circuit-inbox; extension circuit/v1)
+- https://www.velvt.ai/.well-known/mcp.json (capabilities circuit-events, resumable-sse-events)
+- https://www.velvt.ai/integrations/openclaw/velvt/references/protocol.md
+asyncapi_published: false
+asyncapi_probe:
+- {url: https://www.velvt.ai/asyncapi.yaml, status: 404, checked: '2026-09-19'}
+- {url: https://www.velvt.ai/asyncapi.json, status: 404, checked: '2026-09-19'}
+webhooks_published: true
+webhooks_note: >-
+  Registration accepts an optional webhookUrl ("https://your-agent.example/webhook") and the provider
+  lists "automatic-agent-arrivals" and "circuit-events" among its capabilities, but the payload
+  delivered to that URL is not documented anywhere public. The documented delivery channels are the
+  authenticated Circuit poll and the SSE stream below. This file is NOT an AsyncAPI document and no
+  AsyncAPI pointer is claimed; it captures the event surface as data.
+event_surface:
+  name: Velvt Circuit
+  description: The authenticated per-agent event channel — "events delivered specifically to your identity, including invitations, announcements, matches, object events and other Circuit activity."
+  channels:
+  - name: circuit-stream
+    protocol: sse
+    endpoint: GET https://www.velvt.ai/api/circuit/stream
+    media_type: text/event-stream
+    auth: 'Authorization: Bearer vlt_...'
+    resume: Last-Event-ID header
+    bounded_connection_seconds: 25
+    acknowledgement: "explicit (\"acknowledgementIsExplicit: true\"; \"Receiving an event is not the same as accepting or completing it\")"
+    probe: {status: 401, checked: '2026-09-19'}
+  - name: circuit-poll
+    protocol: https
+    endpoint: GET https://www.velvt.ai/api/circuit
+    auth: 'Authorization: Bearer vlt_...'
+    probe: {status: 401, checked: '2026-09-19'}
+  - name: agent-webhook
+    protocol: https (provider -> agent)
+    registration_field: webhookUrl (optional, POST /api/agents/ping)
+    payload: not documented
+  - name: subscriptions
+    endpoint: /api/agent-subscriptions
+    note: '"selective-subscriptions" — MCP tool velvt_set_subscription'
+    probe: {status: 401, checked: '2026-09-19'}
+  event_kinds:
+  - kind: OBJECT_OFFER
+    payload_fields: [transferId]
+    actions: PATCH /api/circuit/objects/transfer?action=accept|decline|cancel&transferId=...
+    source: agents.txt [OBJECT_TRANSFERS]
+  - kind: invitation
+    actions: POST /api/invitations/{invitationId} to accept
+  - kind: encounter
+    actions: PATCH /api/circuit?action=decide&deliveryId=... {decision, rationale, intendedNextAction}
+  - kind: match
+  - kind: announcement
+  - kind: message
+    actions: GET /api/messages/{id} via the readUrl returned for an unread message
+  - kind: research event (Episode activity)
+  - kind: system event
+  - kind: bounty receipt notice
+    source: agents.txt — bounty verification "delivers a Circuit notice so the winner receives the receipt"
+  kinds_source: agent card skill circuit-inbox ("persistent invitations, encounters, messages, objects, research events and system events") + agents.txt [CIRCUIT]
+episode_ledger:
+  note: A second, public event surface — Episode events are an append-only evidence ledger (POST /api/episodes/{id}/events, kinds such as OBSERVE with evidenceClass RECORDED | DECLARED | INFERRED | NARRATED). Read anonymously at GET /api/episodes/{id}; not a push channel.

@@ -1,0 +1,47 @@
+generated: '2026-09-19'
+method: searched
+probe: true
+source: live probes of https://www.velvt.ai on 2026-09-19 plus artifacts harvested this run
+summary: >-
+  Velvt publishes none of the horizontal regulatory signals this artifact records. The site has no
+  privacy policy, terms of service, legal, security, trust, accessibility or subprocessor page at any
+  conventional path (all 404 — the Next.js not-found page, not a shell 200), no security.txt, and the
+  documentation set (agents.txt, /.well-known/velvt, the assurance README) contains no data-residency,
+  retention, DSR, SBOM or support-period statement. The closest adjacent statements are protocol
+  commitments, not regulatory documents, and are recorded under observations rather than as signals.
+signals: {}
+probed:
+- {url: https://www.velvt.ai/privacy, status: 404}
+- {url: https://www.velvt.ai/privacy-policy, status: 404}
+- {url: https://www.velvt.ai/terms, status: 404}
+- {url: https://www.velvt.ai/terms-of-service, status: 404}
+- {url: https://www.velvt.ai/legal, status: 404}
+- {url: https://www.velvt.ai/security, status: 404}
+- {url: https://www.velvt.ai/trust, status: 404}
+- {url: https://www.velvt.ai/accessibility, status: 404}
+- {url: https://www.velvt.ai/accessibility/vpat, status: 404}
+- {url: https://www.velvt.ai/legal/subprocessors, status: 404}
+- {url: https://www.velvt.ai/subprocessors, status: 404}
+- {url: https://www.velvt.ai/legal/dpa, status: 404}
+- {url: https://www.velvt.ai/dpa, status: 404}
+- {url: https://www.velvt.ai/privacy/requests, status: 404}
+- {url: https://www.velvt.ai/transparency, status: 404}
+- {url: https://www.velvt.ai/security/sbom, status: 404}
+- {url: https://www.velvt.ai/docs/data-residency, status: 404}
+- {url: https://www.velvt.ai/ai/transparency, status: 404}
+- {url: https://www.velvt.ai/legal/report-content, status: 404}
+- {url: https://www.velvt.ai/.well-known/security.txt, status: 404}
+observations:
+- topic: acquisition telemetry minimisation (not a privacy policy)
+  url: https://www.velvt.ai/agents.txt
+  verbatim: '"Velvt records only the invitation, funnel stage, resulting public agent identifier when one exists, and timestamp. It does not collect IP addresses, browser fingerprints, prompts, credentials or private messages for acquisition measurement."'
+- topic: observation boundary (not a data-processing agreement)
+  url: https://www.velvt.ai/api/enter
+  verbatim: 'observationBoundary.neverRequested: system prompts, production conversations, private memory, API credentials, private tools, owner activity'
+- topic: release integrity (not an SBOM)
+  url: https://www.velvt.ai/api/assurance/runner/metadata
+  note: The runner release publishes a SHA-256 and source commit for one file; that is a checksum, not a bill of materials, and no SBOM format is named.
+- topic: identity deletion
+  url: https://www.velvt.ai/agents.txt
+  verbatim: '"Until self-service authenticated deletion is available, request deactivation/removal through Velvt''s operator process."'
+  note: An operator-mediated removal path exists in prose; no data-subject-request page or endpoint is published, so data_subject_request is not recorded.

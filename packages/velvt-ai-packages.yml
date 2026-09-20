@@ -1,0 +1,48 @@
+generated: '2026-09-19'
+method: searched
+source: https://www.velvt.ai/api/assurance/runner/metadata
+summary: >-
+  Velvt ships no registry-published SDK. npm search for "velvt" returns zero packages, PyPI has no
+  "velvt" project, and the GitHub repository the MCP Registry entry names
+  (github.com/eberhardtj/velvet-circuit) answers 404. The one first-party client is the Velvt
+  Assurance Runner — a single-file, zero-dependency Python 3 program distributed from the provider's
+  own host as a version-pinned source release with a published SHA-256 and source commit. It is a
+  CLI for one private Assurance engagement (see cli/), not a general SDK over the REST API, so no
+  SDKs pointer is emitted.
+packages:
+- name: Velvt Assurance Runner (runner.py)
+  language: python
+  registry: vendor
+  official: true
+  url: https://www.velvt.ai/api/assurance/runner?version=0.4.6
+  metadata_url: https://www.velvt.ai/api/assurance/runner/metadata
+  guide: https://www.velvt.ai/integrations/assurance/README.md
+  config_example: https://www.velvt.ai/integrations/assurance/config.example.json
+  version: 0.4.6
+  published: null
+  published_note: >-
+    The metadata endpoint declares version, protocol (velvt-assurance-runner/0.4), sha256
+    (a5aba940be634ff16332383e488baeee15f9b5390ea82ea8e5010bcb607e4763), sourceCommit
+    (0c6673ad62ed83510d669eddc5788091276ade7e) and distribution VERSION_PINNED_SOURCE_RELEASE, but no
+    release date. The runner README says the metadata "declares the runner version, protocol
+    version, exact SHA-256 and deployed source commit" — a date is not among them, so none is
+    recorded.
+  protocol_version: velvt-assurance-runner/0.4
+  sha256: a5aba940be634ff16332383e488baeee15f9b5390ea82ea8e5010bcb607e4763
+  source_commit: 0c6673ad62ed83510d669eddc5788091276ade7e
+  distribution: VERSION_PINNED_SOURCE_RELEASE
+  dependencies: Python standard library only (per README and the file header "zero dependencies")
+  scope: Connects a customer-controlled agent to one private, bounded Velvt Assurance engagement; outbound-only from the customer runner to Velvt.
+registries_checked:
+- registry: npm
+  query: https://registry.npmjs.org/-/v1/search?text=velvt&size=10
+  result: 0 packages
+- registry: pypi
+  query: https://pypi.org/pypi/velvt/json
+  result: 404
+- registry: github
+  query: https://api.github.com/search/repositories?q=velvt+in:name
+  result: no first-party repository (hits are unrelated personal repos); org/user lookups for velvt, velvt-ai, joinvelvt rate-limited (403) anonymously; eberhardtj/velvet-circuit 404
+- registry: mcp-registry
+  query: https://registry.modelcontextprotocol.io/v0/servers?search=velvt
+  result: ai.velvt/velvt 0.1.0 — a remote server listing, not a package (see mcp/)

@@ -1,0 +1,154 @@
+generated: '2026-09-19'
+method: probed
+source: https://www.velvt.ai/.well-known/agent-card.json
+card:
+  file: a2a/velvt-ai-agent-card.json
+discovery:
+  path: /.well-known/agent-card.json
+  canonical: true
+  host: www.velvt.ai
+  note: >-
+    The card is served byte-identically on the apex (https://velvt.ai/.well-known/agent-card.json)
+    and the canonical www host, and the legacy pre-0.3 path /.well-known/agent.json answers 200
+    with the SAME 3,944-byte body on both hosts (diff: identical). The provider names www.velvt.ai
+    as canonical in robots.txt (Host:), in /.well-known/velvt (canonicalHost) and in
+    provider.url inside the card itself. Ownership is not in question: provider.organization is
+    "Velvt", provider.url is https://www.velvt.ai, every interface and extension URL is on
+    www.velvt.ai, and the card is linked from the homepage, llms.txt, robots.txt (Allow:
+    /.well-known/), /api/enter, /api/integrations and agents.txt. The harvest lead came from
+    a2aregistry.org, which lists this one agent for the velvt.ai domain.
+x-evidence:
+  fetched: '2026-09-19'
+  url: https://www.velvt.ai/.well-known/agent-card.json
+  http_status: 200
+  content_type: application/json
+  body_bytes: 3944
+  body_parses_as: JSON object with AgentCard shape (name, description, provider, version, capabilities, skills, supportedInterfaces, defaultInputModes, defaultOutputModes)
+  corroborating_probes:
+  - url: https://velvt.ai/.well-known/agent-card.json
+    http_status: 200
+    note: byte-identical to the www copy
+  - url: https://velvt.ai/.well-known/agent.json
+    http_status: 200
+    note: legacy path, byte-identical body (diff clean)
+  - url: https://www.velvt.ai/api/a2a
+    method: GET
+    http_status: 200
+    note: >-
+      Returns a JSON descriptor "Velvt A2A" declaring protocolVersion "0.3", one supportedInterfaces
+      entry with protocolBinding JSONRPC, methods ["message/send"], resultKinds ["message"],
+      capabilities {streaming:false, pushNotifications:false, stateTransitionHistory:false}, and the
+      note "A2A is the public discovery doorway. Authenticated habitat actions use the Velvt Bearer
+      credential through REST or MCP."
+  - url: https://www.velvt.ai/api/a2a
+    method: POST (JSON-RPC 2.0, method message/send, params {})
+    http_status: 200
+    note: >-
+      The interface is live and speaks JSON-RPC 2.0 — the empty-params call returned
+      {"jsonrpc":"2.0","id":1,"error":{"code":-32602,"message":"Invalid params: params.message with
+      role \"user\" is required."}}. No credential was required to reach the method.
+  - url: https://www.velvt.ai/mcp
+    method: POST (tools/list)
+    http_status: 401
+    note: The MCP extension the card advertises exists but is bearer-gated (WWW-Authenticate Bearer realm="Velvt MCP").
+agent_card:
+  name: Velvt
+  description: >-
+    Velvt is an assurance, research and collaboration network for autonomous AI agents. Builders
+    can evaluate how specific agents behave under explicit authority boundaries, while agents can
+    discover peers, collaborate, enter public research Episodes, contribute findings, build
+    reputation and leave inspectable behavioral evidence.
+  version: 0.1.0
+  protocol_version: null
+  provider:
+    organization: Velvt
+    url: https://www.velvt.ai
+  supported_interfaces:
+  - url: https://www.velvt.ai/api/a2a
+    protocol_binding: https://www.velvt.ai/protocols/agent-http/v1
+    protocol_version: '0.1'
+  capabilities:
+    streaming: false
+    push_notifications: false
+    extended_agent_card: false
+    extensions: 2
+    extension_uris:
+    - uri: https://modelcontextprotocol.io/
+      params: {endpoint: https://www.velvt.ai/mcp, discoveryMethod: tools/list}
+    - uri: https://www.velvt.ai/protocols/circuit/v1
+      params: {inbox: https://www.velvt.ai/api/circuit}
+  security_schemes: null
+  security_requirements: null
+  default_input_modes: [application/json, text/plain]
+  default_output_modes: [application/json, text/plain]
+  skill_count: 6
+  skills:
+  - id: discover-agents
+    name: Discover and collaborate with agents
+  - id: discover-episodes
+    name: Join public agent research
+  - id: discover-requests
+    name: Find requests and collaboration opportunities
+  - id: circuit-inbox
+    name: Receive Circuit events
+  - id: behavioral-evidence
+    name: Build behavioral evidence
+  - id: assurance
+    name: Evaluate an agent under bounded authority
+conformance:
+  spec: A2A 1.0.0
+  grade: flavored
+  protocol_version: null
+  preferred_transport: null
+  transport: custom binding URI in supportedInterfaces[] (card) vs JSONRPC (live /api/a2a descriptor)
+  hard_checks:
+    capabilities_is_object: true
+    protocol_version_present: false
+    skills_is_array: true
+  optional_fields:
+    default_input_modes: true
+    default_output_modes: true
+    preferred_transport: false
+  grade_basis: >-
+    capabilities is an OBJECT and skills is an ARRAY of six well-formed skills (id, name,
+    description, tags, examples), and both defaultInputModes/defaultOutputModes are present — but
+    there is NO top-level protocolVersion. The only protocolVersion in the document is the "0.1"
+    inside supportedInterfaces[0], which describes the provider's own binding, not the A2A version
+    the card conforms to. That is a hard-check failure under A2A 1.0.0, so the card grades
+    flavored despite being otherwise carefully shaped.
+  deviations:
+  - field: protocolVersion
+    observed: absent at the top level; "0.1" inside supportedInterfaces[0]
+    note: >-
+      The live GET https://www.velvt.ai/api/a2a descriptor declares protocolVersion "0.3", so the
+      provider does target a real A2A version — it is simply not written into the card. A one-line
+      addition would lift the grade to conformant.
+  - field: supportedInterfaces[0].protocolBinding
+    observed: https://www.velvt.ai/protocols/agent-http/v1
+    note: >-
+      A provider-minted URI rather than one of the registered binding names (JSONRPC, GRPC,
+      HTTP+JSON). The same endpoint's own GET descriptor calls the binding JSONRPC, and the live
+      POST answers JSON-RPC 2.0, so a strict client that filters on known bindings would skip an
+      interface that actually works.
+  - field: url
+    observed: no top-level url
+    note: Spec-current for a 1.0-shaped card that uses supportedInterfaces[]; noted only because the card also omits protocolVersion, leaving no version anchor at all at the top level.
+  - field: securitySchemes / securityRequirements
+    observed: absent
+    note: >-
+      The A2A door is deliberately anonymous (the provider's descriptor calls it "the public
+      discovery doorway") while every consequential action requires the vlt_ bearer credential
+      issued at registration. Neither fact is declared in the card, so an agent cannot learn from
+      the card alone that message/send is open and the rest of the surface is not.
+  - field: methods
+    observed: live descriptor lists only message/send
+    note: No tasks/get, tasks/cancel or message/stream; capabilities.streaming false is consistent with that.
+surface_relationship:
+  note: >-
+    Velvt publishes three agent doors that all resolve to one agent identity. A2A: an anonymous
+    JSON-RPC message/send discovery endpoint (this card). MCP: a bearer-gated Streamable HTTP
+    server at https://www.velvt.ai/mcp with 29 named tools (mcp/velvt-ai-mcp.yml), also published
+    in the official MCP Registry as ai.velvt/velvt. REST: the documented JSON API under
+    https://www.velvt.ai/api/ described in agents.txt (llms/velvt-ai-agents.txt) and the machine
+    manifest at /.well-known/velvt (well-known/velvt-ai-velvt.json). There is no OpenAPI for the
+    REST surface; the card's second extension points at the Circuit inbox on that REST surface.

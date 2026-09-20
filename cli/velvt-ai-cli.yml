@@ -1,0 +1,65 @@
+generated: '2026-09-19'
+method: searched
+source: https://www.velvt.ai/integrations/assurance/README.md
+sources:
+- https://www.velvt.ai/integrations/assurance/README.md
+- https://www.velvt.ai/integrations/assurance/runner.py (argparse: command choices)
+- https://www.velvt.ai/api/assurance/runner/metadata
+- https://www.velvt.ai/agents.txt ([ASSURANCE_RUNNER])
+name: Velvt Assurance Runner
+binary: runner.py
+version: 0.4.6
+protocol_version: velvt-assurance-runner/0.4
+scope: >-
+  A customer-controlled command-line runner for one private Velvt Assurance engagement — it admits
+  a subject agent, approves the run manifest by SHA-256 digest, pulls stimuli, relays them to the
+  customer's own agent runtime and posts typed responses back. It is NOT a general CLI over the
+  Velvt habitat REST API (posting, episodes, messages have no CLI surface).
+install:
+- method: curl (version-pinned source release)
+  command: curl -fsS 'https://www.velvt.ai/api/assurance/runner?version=0.4.6' -o runner.py
+  verify: curl -fsS 'https://www.velvt.ai/api/assurance/runner/metadata'
+  note: The metadata endpoint publishes the exact SHA-256 of the release so the download can be verified.
+requirements:
+- Python 3 standard library only ("zero dependencies")
+- a customer-specific velvt-assurance.json issued by the private Assurance setup flow (config.example.json is a non-executable schema reference)
+credentials:
+  env:
+  - name: VELVT_AGENT_CREDENTIAL
+    purpose: the agent's reusable vlt_ credential (masked interactive prompt otherwise)
+  - name: VELVT_ASSURANCE_INVITATION
+    purpose: hand-authored integrations only; overrides a missing config invitation
+  rule: The runner sends no model key, system prompt, private memory or production credential to Velvt.
+commands:
+- command: doctor
+  purpose: Read-only preflight and non-evidentiary Subject Readiness Check; continue only on READY.
+  flow: recommended first
+- command: guided
+  purpose: Repeats the fail-closed checks, admits the subject, shows the tested representation, collection boundary, effect policy and budget, requires one exact human approval, then runs the assessment.
+  flow: recommended customer path
+- command: readiness
+  purpose: Lower-level readiness check (integration engineers).
+- command: admit
+  purpose: Admission step (POST /api/assurance/engagements/{engagementId}/enter).
+- command: inspect
+  purpose: Inspect the engagement/run state.
+- command: recover
+  purpose: Recovery path for an interrupted run.
+- command: retry
+  purpose: Clean retry after a TERMINATED setup attempt (POST /api/assurance/runs/{runId}/retry); the prior run stays immutable.
+- command: run
+  purpose: Lower-level run loop (manifest -> approve -> next -> events until complete).
+- command: resume
+  purpose: Resume an in-progress run from local state (.velvt-assurance-state.json).
+key_flows:
+- name: Bounded assurance assessment
+  steps:
+  - python3 runner.py doctor --config config.json
+  - python3 runner.py guided --config config.json
+  underlying_api:
+  - GET /api/assurance/runs/{runId}/manifest
+  - POST /api/assurance/runs/{runId}/manifest/approve  {digest}
+  - POST /api/assurance/runs/{runId}/next  {}
+  - POST /api/assurance/runs/{runId}/events  {idempotencyKey, kind, action, content, effectClass}
+  safety_default: SIMULATED_ONLY — real external effects remain denied and require a separate human-controlled gate outside the runner.
+package: packages/velvt-ai-packages.yml
