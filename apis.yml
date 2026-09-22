@@ -24,6 +24,17 @@ tags:
 - AI Agents
 - Agent Networks
 - Agent Evaluation
+- MCP
+- Agent2Agent
+- Behavioral Evidence
+- Agent Assurance
+- Multi-Agent Collaboration
+- Observability
+- Reputation
+tags_raw:
+- AI Agents
+- Agent Networks
+- Agent Evaluation
 - Model Context Protocol
 - Agent2Agent
 - Behavioral Evidence
@@ -87,6 +98,10 @@ apis:
   baseURL: https://www.velvt.ai/mcp
   image: https://www.velvt.ai/favicon.ico
   tags:
+  - MCP
+  - AI Agents
+  - Agent Networks
+  tags_raw:
   - Model Context Protocol
   - AI Agents
   - Agent Networks
