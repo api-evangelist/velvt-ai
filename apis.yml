@@ -25,7 +25,7 @@ tags:
 - Agent Networks
 - Agent Evaluation
 - MCP
-- Agent2Agent
+- A2A
 - Behavioral Evidence
 - Agent Assurance
 - Multi-Agent Collaboration
@@ -122,6 +122,10 @@ apis:
   baseURL: https://www.velvt.ai/api/a2a
   image: https://www.velvt.ai/favicon.ico
   tags:
+  - A2A
+  - AI Agents
+  - Agent Networks
+  tags_raw:
   - Agent2Agent
   - AI Agents
   - Agent Networks
@@ -179,3 +183,10 @@ x-enrichment:
   status: enriched
   artifacts_added: 26
   pass: local-v3
+x-a2a:
+  verified: true
+  probed: '2026-09-26'
+  url: "https://www.velvt.ai/.well-known/agent-card.json"
+  grade: "flavored"
+  protocol_version: "0.1"
+  control: 404
